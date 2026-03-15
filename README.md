@@ -6,9 +6,9 @@ Spring Boot API for workflows: define steps and rules, run executions, track sta
 
 ## Techs Used 
 
-=>Frontend : React,CSS,JavaScript
-=>Backend  : SpringBoot
-=>DataBase : MySql
+1. **Frontend :** React,CSS,JavaScript.
+2. **Backend &nbsp;:** SpringBoot.
+3. **DataBase :** MySql.
 
 ---
 
