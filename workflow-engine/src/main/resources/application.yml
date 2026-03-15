@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: workflow-engine
+  datasource:
+    url: jdbc:mysql://localhost:3306/workflowdb?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: K8344833439k!
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+server:
+  port: 8080
+
+# CORS will be configured in code for React app
+workflow:
+  max-loop-iterations: 100

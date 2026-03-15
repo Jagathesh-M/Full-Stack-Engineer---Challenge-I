@@ -1,0 +1,104 @@
+.execution-detail .editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.execution-detail .section {
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.execution-detail .section h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-muted);
+}
+
+.execution-detail .summary-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.execution-detail .summary-grid dt {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.execution-detail .data-json {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  background: var(--bg);
+  padding: 1rem;
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+
+.execution-detail .log-list {
+  list-style: none;
+}
+
+.execution-detail .log-entry {
+  padding: 1rem;
+  background: var(--bg);
+  border-radius: var(--radius);
+  margin-bottom: 0.75rem;
+  border-left: 3px solid var(--border);
+}
+
+.execution-detail .log-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.execution-detail .log-step-name {
+  font-weight: 600;
+}
+
+.execution-detail .log-status {
+  margin-left: auto;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.execution-detail .log-next,
+.execution-detail .log-time {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-top: 0.35rem;
+}
+
+.execution-detail .log-rules {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.execution-detail .log-rules ul {
+  margin-top: 0.25rem;
+  padding-left: 1.25rem;
+}
+
+.execution-detail .log-rules code {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  background: var(--surface);
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+}
+
+.execution-detail .log-error {
+  color: var(--error);
+  margin-top: 0.5rem;
+}
+
+.execution-detail .text-muted {
+  color: var(--text-muted);
+}

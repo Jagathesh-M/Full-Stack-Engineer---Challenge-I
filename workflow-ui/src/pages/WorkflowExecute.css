@@ -1,0 +1,40 @@
+.workflow-execute .editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.workflow-execute .section {
+  padding: 1.25rem;
+}
+
+.workflow-execute .section h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-muted);
+}
+
+.workflow-execute .input-fields {
+  display: grid;
+  gap: 1rem;
+  max-width: 400px;
+  margin-bottom: 1rem;
+}
+
+.workflow-execute .type-hint {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.workflow-execute .required {
+  color: var(--error);
+}
+
+.workflow-execute .text-muted {
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
