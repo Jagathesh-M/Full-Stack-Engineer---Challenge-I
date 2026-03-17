@@ -32,7 +32,7 @@ public class Step {
     @Column(name = "step_type", nullable = false)
     private StepType stepType;
 
-    @Column(nullable = false)
+    @Column(name ="step_order",nullable = false)
     private Integer order;
 
     @JdbcTypeCode(SqlTypes.JSON)

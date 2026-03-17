@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { api } from '../api/client'
+import { getOrCreateActorId } from '../utils/actor'
 import './WorkflowExecute.css'
 
 export default function WorkflowExecute() {
@@ -44,7 +45,8 @@ export default function WorkflowExecute() {
     e.preventDefault()
     setExecuting(true)
     setError(null)
-    api.executions.start(id, { data: inputData })
+    const triggeredBy = getOrCreateActorId()
+    api.executions.start(id, { data: inputData, triggeredBy })
       .then((exec) => navigate(`/executions/${exec.id}`))
       .catch((e) => setError(e.message))
       .finally(() => setExecuting(false))

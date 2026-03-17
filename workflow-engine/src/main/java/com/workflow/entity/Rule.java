@@ -21,7 +21,7 @@ public class Rule {
     @Column(name = "step_id", nullable = false)
     private UUID stepId;
 
-    @Column(nullable = false, length = 2000)
+    @Column(name = "step_condition",nullable = false, length = 2000)
     private String condition;
 
     @Column(name = "next_step_id")

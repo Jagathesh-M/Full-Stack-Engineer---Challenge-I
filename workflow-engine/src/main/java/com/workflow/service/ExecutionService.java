@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -94,7 +93,6 @@ public class ExecutionService {
             List<Map<String, Object>> evaluatedRules = new ArrayList<>();
             List<Rule> rules = ruleRepository.findByStepIdOrderByPriorityAsc(step.getId());
             UUID nextStepId = null;
-            String selectedCondition = null;
             boolean ruleMatched = false;
 
             for (Rule rule : rules) {
@@ -105,7 +103,6 @@ public class ExecutionService {
                 ));
                 if (result) {
                     nextStepId = rule.getNextStepId();
-                    selectedCondition = rule.getCondition();
                     ruleMatched = true;
                     break;
                 }
@@ -122,11 +119,10 @@ public class ExecutionService {
             stepLog.put("step_type", step.getStepType().name());
             stepLog.put("evaluated_rules", evaluatedRules);
             stepLog.put("selected_next_step", nextStepName);
-            stepLog.put("selected_condition", selectedCondition);
             stepLog.put("status", "completed");
             stepLog.put("started_at", stepStart.toString());
             stepLog.put("ended_at", Instant.now().toString());
-            stepLog.put("approver_id", (Object) null);
+            stepLog.put("approver_id", resolveApproverId(step, data));
             stepLog.put("error_message", (Object) null);
             logs.add(stepLog);
 
@@ -162,6 +158,19 @@ public class ExecutionService {
             execution.setLogs(logs);
         }
         executionRepository.save(execution);
+    }
+
+    private Object resolveApproverId(Step step, Map<String, Object> data) {
+        if (step == null || step.getStepType() != Step.StepType.approval || data == null) return null;
+        Object v = firstNonNull(data, "approver_id", "approverId", "approved_by", "approvedBy", "user_id", "userId");
+        return v != null ? String.valueOf(v) : null;
+    }
+
+    private Object firstNonNull(Map<String, Object> data, String... keys) {
+        for (String k : keys) {
+            if (data.containsKey(k) && data.get(k) != null) return data.get(k);
+        }
+        return null;
     }
 
     public Optional<ExecutionDto> getById(UUID id) {
@@ -205,8 +214,8 @@ public class ExecutionService {
             Map<String, Object> log = logs.get(i);
             if (log.containsKey("step_id")) {
                 try {
-                    return UUID.fromString((String) log.get("step_id"));
-                } catch (Exception ignored) {}
+                    return UUID.fromString(String.valueOf(log.get("step_id")));
+                } catch (Exception ignored) { }
             }
         }
         return null;

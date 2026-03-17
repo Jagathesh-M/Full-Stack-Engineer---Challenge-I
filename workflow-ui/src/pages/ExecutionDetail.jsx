@@ -3,10 +3,32 @@ import { useParams, Link } from 'react-router-dom'
 import { api } from '../api/client'
 import './ExecutionDetail.css'
 
+function formatDurationMs(ms) {
+  if (!Number.isFinite(ms) || ms < 0) return null
+  const totalSeconds = Math.floor(ms / 1000)
+  const hh = String(Math.floor(totalSeconds / 3600)).padStart(2, '0')
+  const mm = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0')
+  const ss = String(totalSeconds % 60).padStart(2, '0')
+  return `${hh}:${mm}:${ss}`
+}
+
+function entryDuration(entry) {
+  try {
+    if (!entry?.started_at || !entry?.ended_at) return null
+    const a = new Date(entry.started_at).getTime()
+    const b = new Date(entry.ended_at).getTime()
+    if (!Number.isFinite(a) || !Number.isFinite(b)) return null
+    return formatDurationMs(b - a)
+  } catch {
+    return null
+  }
+}
+
 export default function ExecutionDetail() {
   const { id } = useParams()
   const [exec, setExec] = useState(null)
   const [workflow, setWorkflow] = useState(null)
+  const [steps, setSteps] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [actioning, setActioning] = useState(false)
@@ -16,7 +38,10 @@ export default function ExecutionDetail() {
       .then((e) => {
         setExec(e)
         if (e.workflowId) {
-          return api.workflows.get(e.workflowId).then(setWorkflow)
+          return api.workflows.getDetail(e.workflowId).then((d) => {
+            setWorkflow(d.workflow)
+            setSteps(d.steps || [])
+          })
         }
       })
       .catch((e) => setError(e.message))
@@ -44,6 +69,9 @@ export default function ExecutionDetail() {
 
   const statusClass = `badge badge-${(exec.status || '').toLowerCase().replace(' ', '_')}`
   const logs = exec.logs || []
+  const stepNameById = new Map(steps.map((s) => [s.id, s.name]))
+  const currentStepName = exec.currentStepId ? (stepNameById.get(exec.currentStepId) ?? exec.currentStepId) : null
+  const lastStepName = logs.length > 0 ? (logs[logs.length - 1]?.step_name ?? null) : null
 
   return (
     <div className="execution-detail">
@@ -66,6 +94,8 @@ export default function ExecutionDetail() {
           <dd>{workflow?.name ?? exec.workflowId}</dd>
           <dt>Version</dt>
           <dd>{exec.workflowVersion}</dd>
+          <dt>Current step</dt>
+          <dd>{currentStepName ?? (lastStepName ? `${lastStepName} (last)` : '—')}</dd>
           <dt>Started</dt>
           <dd>{exec.startedAt ? new Date(exec.startedAt).toLocaleString() : '—'}</dd>
           <dt>Ended</dt>
@@ -93,7 +123,7 @@ export default function ExecutionDetail() {
       )}
 
       <div className="card section">
-        <h2>Execution logs</h2>
+        <h2>Execution progress / logs</h2>
         {logs.length === 0 ? (
           <p className="text-muted">No step logs yet.</p>
         ) : (
@@ -101,7 +131,7 @@ export default function ExecutionDetail() {
             {logs.map((entry, idx) => (
               <li key={idx} className="log-entry">
                 <div className="log-header">
-                  <span className="log-step-name">{entry.step_name ?? 'Step'}</span>
+                  <span className="log-step-name">[Step {idx + 1}] {entry.step_name ?? 'Step'}</span>
                   <span className="badge step-type">{entry.step_type}</span>
                   <span className="log-status">{entry.status}</span>
                 </div>
@@ -111,7 +141,7 @@ export default function ExecutionDetail() {
                 {entry.evaluated_rules && entry.evaluated_rules.length > 0 && (
                   <div className="log-rules">
                     <strong>Rules evaluated:</strong>
-                    <ul>
+                    <ul className="rule-evals">
                       {entry.evaluated_rules.map((r, i) => (
                         <li key={i}>
                           <code>{r.rule}</code> → {r.result ? 'true' : 'false'}
@@ -120,12 +150,16 @@ export default function ExecutionDetail() {
                     </ul>
                   </div>
                 )}
+                {entry.approver_id && (
+                  <div className="log-meta">Approver: <code>{entry.approver_id}</code></div>
+                )}
                 {entry.error_message && (
                   <div className="log-error">{entry.error_message}</div>
                 )}
                 {entry.started_at && (
                   <div className="log-time">
-                    {entry.started_at} → {entry.ended_at}
+                    <span>{entry.started_at} → {entry.ended_at}</span>
+                    {entryDuration(entry) && <span className="log-duration">Duration: {entryDuration(entry)}</span>}
                   </div>
                 )}
               </li>

@@ -18,6 +18,7 @@ export default function WorkflowEditor() {
   const [loading, setLoading] = useState(!isNew)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const [schemaPreview, setSchemaPreview] = useState([])
 
   useEffect(() => {
     if (isNew) {
@@ -38,6 +39,29 @@ export default function WorkflowEditor() {
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
   }, [id, isNew])
+
+  useEffect(() => {
+    try {
+      const parsed = JSON.parse(schemaJson || '{}')
+      const keys = Object.keys(parsed || {})
+      const preview = keys.map((k) => {
+        const def = parsed[k]
+        if (def && typeof def === 'object') {
+          const allowed = Array.isArray(def.allowed_values) ? def.allowed_values : null
+          return {
+            key: k,
+            type: def.type ?? 'string',
+            required: !!def.required,
+            allowed,
+          }
+        }
+        return { key: k, type: 'string', required: false, allowed: null }
+      })
+      setSchemaPreview(preview)
+    } catch {
+      setSchemaPreview([])
+    }
+  }, [schemaJson])
 
   const handleSaveWorkflow = (e) => {
     e.preventDefault()
@@ -93,6 +117,32 @@ export default function WorkflowEditor() {
       .catch((e) => setError(e.message))
   }
 
+  const handleEditStep = (step) => {
+    const newName = prompt('Step name', step.name)
+    if (!newName) return
+    const newType = prompt('Step type: task, approval, or notification', step.stepType)
+    if (!STEP_TYPES.includes(newType)) {
+      setError('Invalid step type')
+      return
+    }
+    api.steps.update(step.id, { name: newName, stepType: newType })
+      .then((updated) => setSteps((prev) => prev.map((s) => (s.id === updated.id ? updated : s))))
+      .catch((e) => setError(e.message))
+  }
+
+  const handleSetStartStep = (stepId) => {
+    if (!id) return
+    setSaving(true)
+    setError(null)
+    api.workflows.update(id, { name, inputSchema: inputSchema ?? {}, isActive: true, startStepId: stepId })
+      .then((w) => {
+        setWorkflow(w)
+        setDetail((d) => d ? { ...d, workflow: w } : null)
+      })
+      .catch((e) => setError(e.message))
+      .finally(() => setSaving(false))
+  }
+
   const handleDeleteStep = (stepId) => {
     if (!confirm('Delete this step?')) return
     api.steps.delete(stepId)
@@ -122,6 +172,21 @@ export default function WorkflowEditor() {
           <label>Name</label>
           <input value={name} onChange={(e) => setName(e.target.value)} required />
         </div>
+        {!isNew && (
+          <div className="form-group">
+            <label>Start step</label>
+            <select
+              value={workflow?.startStepId ?? ''}
+              onChange={(e) => handleSetStartStep(e.target.value || null)}
+              disabled={saving}
+            >
+              <option value="">(not set)</option>
+              {steps.map((s) => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="form-group">
           <label>Input schema (JSON)</label>
           <textarea
@@ -131,6 +196,25 @@ export default function WorkflowEditor() {
             className="schema-textarea"
           />
         </div>
+        {schemaPreview.length > 0 && (
+          <div className="schema-preview">
+            <div className="schema-preview-title">Preview</div>
+            <ul className="schema-preview-list">
+              {schemaPreview.map((f) => (
+                <li key={f.key}>
+                  <code>{f.key}</code>
+                  <span className="schema-chip">{f.type}</span>
+                  {f.required && <span className="schema-chip schema-chip-required">required</span>}
+                  {f.allowed && (
+                    <span className="schema-allowed">
+                      ({f.allowed.join(' | ')})
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <button type="submit" className="btn btn-primary" disabled={saving}>
           {isNew ? 'Create workflow' : 'Save workflow'}
         </button>
@@ -145,10 +229,18 @@ export default function WorkflowEditor() {
                 <span className="step-order">{s.order + 1}.</span>
                 <span className="step-name">{s.name}</span>
                 <span className="badge step-type">{s.stepType}</span>
+                {workflow?.startStepId === s.id && <span className="badge badge-start">Start</span>}
                 <div className="action-buttons">
                   <Link to={`/workflows/${id}/steps/${s.id}/rules`} className="btn btn-secondary btn-sm">
                     Rules
                   </Link>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => handleEditStep(s)}
+                  >
+                    Edit
+                  </button>
                   <button
                     type="button"
                     className="btn btn-danger btn-sm"

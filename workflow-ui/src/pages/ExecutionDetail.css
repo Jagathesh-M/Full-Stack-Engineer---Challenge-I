@@ -76,6 +76,20 @@
   margin-top: 0.35rem;
 }
 
+.execution-detail .log-meta {
+  margin-top: 0.35rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.execution-detail .log-meta code {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  background: var(--surface);
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+}
+
 .execution-detail .log-rules {
   margin-top: 0.5rem;
   font-size: 0.875rem;
@@ -92,6 +106,17 @@
   background: var(--surface);
   padding: 0.1rem 0.3rem;
   border-radius: 4px;
+}
+
+.execution-detail .log-time {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.execution-detail .log-duration {
+  font-weight: 600;
 }
 
 .execution-detail .log-error {
