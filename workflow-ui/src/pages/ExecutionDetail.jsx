@@ -3,6 +3,18 @@ import { useParams, Link } from 'react-router-dom'
 import { api } from '../api/client'
 import './ExecutionDetail.css'
 
+function normalizeStepType(v) {
+  const s = String(v ?? '').trim().toLowerCase()
+  if (s === 'task' || s === 'approval' || s === 'notification') return s
+  return s || null
+}
+
+function formatStepTypeLabel(v) {
+  const t = normalizeStepType(v)
+  if (!t) return '—'
+  return t.charAt(0).toUpperCase() + t.slice(1)
+}
+
 function formatDurationMs(ms) {
   if (!Number.isFinite(ms) || ms < 0) return null
   const totalSeconds = Math.floor(ms / 1000)
@@ -132,7 +144,9 @@ export default function ExecutionDetail() {
               <li key={idx} className="log-entry">
                 <div className="log-header">
                   <span className="log-step-name">[Step {idx + 1}] {entry.step_name ?? 'Step'}</span>
-                  <span className="badge step-type">{entry.step_type}</span>
+                  <span className={`badge step-type ${normalizeStepType(entry.step_type) ? `step-type-${normalizeStepType(entry.step_type)}` : 'step-type-unknown'}`}>
+                    {formatStepTypeLabel(entry.step_type)}
+                  </span>
                   <span className="log-status">{entry.status}</span>
                 </div>
                 {entry.selected_next_step != null && (

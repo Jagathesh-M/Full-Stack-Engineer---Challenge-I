@@ -127,3 +127,28 @@
 .execution-detail .text-muted {
   color: var(--text-muted);
 }
+
+.execution-detail .badge.step-type {
+  border: 1px solid var(--border);
+  background: rgba(139, 139, 150, 0.12);
+  color: var(--text-muted);
+  text-transform: none;
+}
+
+.execution-detail .badge.step-type.step-type-task {
+  background: rgba(99, 102, 241, 0.18);
+  color: var(--accent);
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
+.execution-detail .badge.step-type.step-type-approval {
+  background: rgba(234, 179, 8, 0.18);
+  color: var(--warning);
+  border-color: rgba(234, 179, 8, 0.35);
+}
+
+.execution-detail .badge.step-type.step-type-notification {
+  background: rgba(34, 197, 94, 0.16);
+  color: var(--success);
+  border-color: rgba(34, 197, 94, 0.35);
+}
